@@ -124,6 +124,17 @@ from bs4 import BeautifulSoup
 
 BASE_URL = 'https://downloads.khinsider.com/'
 
+# A user-agent needs to be specified or else you'll get a 403
+headers = {"Accept": "application/json, text/plain, */*",
+    "Accept-Encoding": "gzip, deflate, br, zstd",
+    "Accept-Language": "en-GB,en-US;q=0.9,en;q=0.8",
+    "Connection": "keep-alive",
+    "Referer": "",
+    "Sec-Fetch-Dest": "empty",
+    "Sec-Fetch-Mode": "cors",
+    "Sec-Fetch-Site":"same-site",
+    "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"}
+
 # Although some of these are valid on Linux, keeping this the same
 # across systems is nice for consistency AND it works on WSL.
 FILENAME_INVALID_RE = re.compile(r'[<>:"/\\|?*]')
@@ -192,7 +203,7 @@ def getAppropriateFile(song, formatOrder):
     return song.files[0]
 
 
-def friendlyDownloadFile(file, path, index, total, verbose=False):
+def friendlyDownloadFile(file, path, index, total, verbose=True):
     numberStr = "{}/{}".format(
         str(index).zfill(len(str(total))),
         str(total)
@@ -289,7 +300,7 @@ class Soundtrack(object):
 
     @lazyProperty
     def _contentSoup(self):
-        soup = getSoup(self.url)
+        soup = getSoup(self.url, headers=headers)
         contentSoup = soup.find(id='pageContent')
         if contentSoup.find('p').string == "No such album":
             # The pageContent and p exist even if the soundtrack doesn't, so no
@@ -328,10 +339,9 @@ class Soundtrack(object):
         anchors = [a for a in table('a') if a.find('img')]
         urls = [a['href'] for a in anchors]
         images = [File(urljoin(self.url, url)) for url in urls]
-        print(images)
         return images
 
-    def download(self, path='', makeDirs=True, formatOrder=None, verbose=False):
+    def download(self, path='', makeDirs=True, formatOrder=None, verbose=True):
         """Download the soundtrack to the directory specified by `path`!
         
         Create any directories that are missing if `makeDirs` is set to True.
@@ -392,10 +402,10 @@ class Song(object):
     
     @lazyProperty
     def _soup(self):
-        r = requests.get(self.url, timeout=10)
+        r = requests.get(self.url, timeout=5, headers=headers)
         if r.url.rsplit('/', 1)[-1] == '404':
             raise NonexistentSongError("Nonexistent song page (404).")
-        return getSoup(self.url)
+        return getSoup(self.url, headers=headers)
 
     @lazyProperty
     def name(self):
@@ -440,12 +450,12 @@ class File(object):
     
     def download(self, path):
         """Download the file to `path`."""
-        response = requests.get(self.url, timeout=10)
+        response = requests.get(self.url, timeout=5, headers=headers)
         with open(path, 'wb') as outFile:
             outFile.write(response.content)
 
 
-def download(soundtrackId, path='', makeDirs=True, formatOrder=None, verbose=False):
+def download(soundtrackId, path='', makeDirs=True, formatOrder=None, verbose=True):
     """Download the soundtrack with the ID `soundtrackId`.
     See Soundtrack.download for more information.
     """
@@ -466,7 +476,7 @@ def search(term):
     `term`. The first tuple contains album name results, and the second song
     name results.
     """
-    r = requests.get(urljoin(BASE_URL, 'search'), params={'search': term})
+    r = requests.get(urljoin(BASE_URL, 'search'), params={'search': term}, headers=headers)
     path = urlsplit(r.url).path
     if path.split('/', 2)[1] == 'game-soundtracks':
         return [Soundtrack(path.rsplit('/', 1)[-1])]
