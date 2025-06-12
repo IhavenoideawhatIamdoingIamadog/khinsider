@@ -127,15 +127,11 @@ BASE_URL = 'https://downloads.khinsider.com/'
 # A user-agent needs to be specified or else you'll get a 403
 # Encoding needs to be identity or else you need to do additional decoding
 # of the request response
-headers = {"Accept": "application/json, text/plain, */*",
+# Make it as minimal as possible - if other issues appear in the future, we'll add more 
+headers = {"User-Agent": "Mozilla/5.0",
+    "Accept": "text/html,application/xhtml+xml",
     "Accept-Encoding": "identity",
-    "Accept-Language": "en-GB,en-US;q=0.9,en;q=0.8",
-    "Connection": "keep-alive",
-    "Referer": "",
-    "Sec-Fetch-Dest": "empty",
-    "Sec-Fetch-Mode": "cors",
-    "Sec-Fetch-Site":"same-site",
-    "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"}
+    "Accept-Language": "en-US,en;q=0.9"}
 
 # Although some of these are valid on Linux, keeping this the same
 # across systems is nice for consistency AND it works on WSL.
