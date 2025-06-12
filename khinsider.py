@@ -131,7 +131,8 @@ BASE_URL = 'https://downloads.khinsider.com/'
 headers = {"User-Agent": "Mozilla/5.0",
     "Accept": "text/html,application/xhtml+xml",
     "Accept-Encoding": "identity",
-    "Accept-Language": "en-US,en;q=0.9"}
+    "Accept-Language": "en-US,en;q=0.9",
+    "Sec-Fetch-Site":"same-site"}
 
 # Although some of these are valid on Linux, keeping this the same
 # across systems is nice for consistency AND it works on WSL.
