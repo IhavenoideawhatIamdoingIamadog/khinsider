@@ -125,8 +125,10 @@ from bs4 import BeautifulSoup
 BASE_URL = 'https://downloads.khinsider.com/'
 
 # A user-agent needs to be specified or else you'll get a 403
+# Encoding needs to be identity or else you need to do additional decoding
+# of the request response
 headers = {"Accept": "application/json, text/plain, */*",
-    "Accept-Encoding": "gzip, deflate, br, zstd",
+    "Accept-Encoding": "identity",
     "Accept-Language": "en-GB,en-US;q=0.9,en;q=0.8",
     "Connection": "keep-alive",
     "Referer": "",
@@ -402,7 +404,7 @@ class Song(object):
     
     @lazyProperty
     def _soup(self):
-        r = requests.get(self.url, timeout=5, headers=headers)
+        r = requests.get(self.url, timeout=10, headers=headers)
         if r.url.rsplit('/', 1)[-1] == '404':
             raise NonexistentSongError("Nonexistent song page (404).")
         return getSoup(self.url, headers=headers)
@@ -450,7 +452,7 @@ class File(object):
     
     def download(self, path):
         """Download the file to `path`."""
-        response = requests.get(self.url, timeout=5, headers=headers)
+        response = requests.get(self.url, timeout=10, headers=headers)
         with open(path, 'wb') as outFile:
             outFile.write(response.content)
 
